@@ -1,7 +1,17 @@
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
 import React from 'react';
-import { Toast } from 'toastify-react-native';
 import LoginScreen from '../login';
+import apiService from '../../services/api';
+
+jest.mock('../../services/api', () => ({
+    __esModule: true,
+    default: {
+        login: jest.fn().mockResolvedValue({
+            token: 'test-token',
+            user: { id: '1', email: 'test@example.com', username: 'testuser' },
+        }),
+    },
+}));
 
 jest.mock('expo-router', () => ({
     useRouter: () => ({
@@ -52,7 +62,7 @@ describe('LoginScreen', () => {
         });
     });
 
-    it('displays error toast for invalid email', async () => {
+    it('displays inline error for invalid email', async () => {
         const { getByPlaceholderText, getByText } = render(<LoginScreen />);
 
         const emailInput = getByPlaceholderText('Adresse e-mail');
@@ -62,16 +72,11 @@ describe('LoginScreen', () => {
         fireEvent.press(loginButton);
 
         await waitFor(() => {
-            expect(Toast.show).toHaveBeenCalledWith(
-                expect.objectContaining({
-                    text1: 'Adresse e-mail invalide',
-                    position: 'bottom',
-                })
-            );
+            expect(getByText('Adresse e-mail invalide')).toBeTruthy();
         });
     });
 
-    it('displays error toast for short password', async () => {
+    it('displays inline error for short password', async () => {
         const { getByPlaceholderText, getByText } = render(<LoginScreen />);
 
         const emailInput = getByPlaceholderText('Adresse e-mail');
@@ -83,12 +88,7 @@ describe('LoginScreen', () => {
         fireEvent.press(loginButton);
 
         await waitFor(() => {
-            expect(Toast.show).toHaveBeenCalledWith(
-                expect.objectContaining({
-                    text1: 'Le mot de passe doit contenir au moins 8 caractères',
-                    position: 'bottom',
-                })
-            );
+            expect(getByText('Le mot de passe doit contenir au moins 8 caractères')).toBeTruthy();
         });
     });
 
@@ -110,7 +110,7 @@ describe('LoginScreen', () => {
 
         expect(registerLink).toBeTruthy();
         fireEvent.press(registerLink);
-    }); it('shows success toast on valid login', async () => {
+    }); it('submits login on valid credentials', async () => {
         const { getByPlaceholderText, getByText } = render(<LoginScreen />);
 
         const emailInput = getByPlaceholderText('Adresse e-mail');
@@ -122,38 +122,30 @@ describe('LoginScreen', () => {
         fireEvent.press(loginButton);
 
         await waitFor(() => {
-            expect(Toast.show).toHaveBeenCalledWith(
-                expect.objectContaining({
-                    text1: 'Connexion réussie !',
-                    position: 'bottom',
-                })
-            );
+            expect(apiService.login).toHaveBeenCalledWith({
+                email: 'test@example.com',
+                password: 'password123',
+            });
         });
-    }); it('shows toast when Google login is pressed', () => {
+    }); it('shows inline info when Google login is pressed', async () => {
         const { getByText } = render(<LoginScreen />);
         const googleButton = getByText('Continuer avec Google');
 
         fireEvent.press(googleButton);
 
-        expect(Toast.show).toHaveBeenCalledWith(
-            expect.objectContaining({
-                text1: 'Tentative de connexion avec Google',
-                position: 'bottom',
-            })
-        );
+        await waitFor(() => {
+            expect(getByText('Connexion Google bientôt disponible.')).toBeTruthy();
+        });
     });
 
-    it('shows toast when Apple login is pressed', () => {
+    it('shows inline info when Apple login is pressed', async () => {
         const { getByText } = render(<LoginScreen />);
         const appleButton = getByText('Continuer avec Apple');
 
         fireEvent.press(appleButton);
 
-        expect(Toast.show).toHaveBeenCalledWith(
-            expect.objectContaining({
-                text1: 'Tentative de connexion avec Apple',
-                position: 'bottom',
-            })
-        );
+        await waitFor(() => {
+            expect(getByText('Connexion Apple bientôt disponible.')).toBeTruthy();
+        });
     });
 });

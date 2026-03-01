@@ -3,9 +3,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { ActivityIndicator, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import ToastManager, { Toast } from 'toastify-react-native';
 import apiService from '../services/api';
-import toast from '../utils/toast';
 import { validateEmail, validateLengthRange, validateMinLength, validatePassword, validatePhone } from '../utils/validation';
 
 // Common country codes for phone registration
@@ -49,25 +47,69 @@ export default function RegisterScreen() {
     const [lastNameFocused, setLastNameFocused] = useState(false);
     const [descriptionFocused, setDescriptionFocused] = useState(false);
     const [phoneFocused, setPhoneFocused] = useState(false);
+    const [emailError, setEmailError] = useState<string | null>(null);
+    const [firstNameError, setFirstNameError] = useState<string | null>(null);
+    const [lastNameError, setLastNameError] = useState<string | null>(null);
+    const [usernameError, setUsernameError] = useState<string | null>(null);
+    const [passwordError, setPasswordError] = useState<string | null>(null);
+    const [descriptionError, setDescriptionError] = useState<string | null>(null);
+    const [phoneError, setPhoneError] = useState<string | null>(null);
+    const [formError, setFormError] = useState<string | null>(null);
+    const [formInfo, setFormInfo] = useState<string | null>(null);
 
     const router = useRouter();
 
     const handleRegister = async () => {
-        const validations = [
-            validateEmail(email),
-            validateMinLength(firstName, 2, 'Le prénom'),
-            validateMinLength(lastName, 2, 'Le nom'),
-            validateMinLength(username, 3, 'L\'identifiant'),
-            validatePassword(password),
-            validateLengthRange(description, 10, 500, 'La description'),
-            validatePhone(phoneNumber),
-        ];
+        setFormError(null);
+        setFormInfo(null);
+        setEmailError(null);
+        setFirstNameError(null);
+        setLastNameError(null);
+        setUsernameError(null);
+        setPasswordError(null);
+        setDescriptionError(null);
+        setPhoneError(null);
 
-        for (const validation of validations) {
-            if (!validation.isValid) {
-                toast.error(validation.error ?? 'Une erreur de validation est survenue');
-                return;
-            }
+        const emailValidation = validateEmail(email);
+        if (!emailValidation.isValid) {
+            setEmailError(emailValidation.error ?? "Adresse e-mail invalide");
+            return;
+        }
+
+        const firstNameValidation = validateMinLength(firstName, 2, 'Le prénom');
+        if (!firstNameValidation.isValid) {
+            setFirstNameError(firstNameValidation.error ?? 'Le prénom est requis');
+            return;
+        }
+
+        const lastNameValidation = validateMinLength(lastName, 2, 'Le nom');
+        if (!lastNameValidation.isValid) {
+            setLastNameError(lastNameValidation.error ?? 'Le nom est requis');
+            return;
+        }
+
+        const usernameValidation = validateMinLength(username, 3, "L'identifiant");
+        if (!usernameValidation.isValid) {
+            setUsernameError(usernameValidation.error ?? "L'identifiant est requis");
+            return;
+        }
+
+        const passwordValidation = validatePassword(password);
+        if (!passwordValidation.isValid) {
+            setPasswordError(passwordValidation.error ?? 'Mot de passe invalide');
+            return;
+        }
+
+        const descriptionValidation = validateLengthRange(description, 10, 500, 'La description');
+        if (!descriptionValidation.isValid) {
+            setDescriptionError(descriptionValidation.error ?? 'La description est requise');
+            return;
+        }
+
+        const phoneValidation = validatePhone(phoneNumber);
+        if (!phoneValidation.isValid) {
+            setPhoneError(phoneValidation.error ?? 'Numéro de téléphone invalide');
+            return;
         }
 
         setLoading(true);
@@ -83,11 +125,10 @@ export default function RegisterScreen() {
                 numberPhone: phoneNumber,
                 profileImage: '',
             });
-            toast.success('Inscription réussie !');
             router.replace('/login');
         } catch (error) {
             console.error('Registration error:', error instanceof Error ? error.message : 'Unknown error');
-            toast.error(error instanceof Error ? error.message : 'Erreur d\'inscription');
+            setFormError(error instanceof Error ? error.message : "Erreur d'inscription");
         } finally {
             setLoading(false);
         }
@@ -106,7 +147,13 @@ export default function RegisterScreen() {
                                 {Boolean(emailFocused || email) && (
                                     <Text style={styles.floatingLabel}>Adresse e-mail</Text>
                                 )}
-                                <View style={[styles.inputGroup, (emailFocused || email) && styles.inputGroupFocused]}>
+                                <View
+                                    style={[
+                                        styles.inputGroup,
+                                        (emailFocused || email) && styles.inputGroupFocused,
+                                        emailError && styles.inputGroupError,
+                                    ]}
+                                >
                                     <Ionicons name="mail-outline" size={20} color="#000" style={styles.leadingIcon} />
                                     <TextInput
                                         style={styles.input}
@@ -114,83 +161,136 @@ export default function RegisterScreen() {
                                         keyboardType="email-address"
                                         autoCapitalize="none"
                                         value={email}
-                                        onChangeText={setEmail}
+                                        onChangeText={(value) => {
+                                            setEmail(value);
+                                            if (emailError) setEmailError(null);
+                                            if (formError) setFormError(null);
+                                            if (formInfo) setFormInfo(null);
+                                        }}
                                         onFocus={() => setEmailFocused(true)}
                                         onBlur={() => setEmailFocused(false)}
                                         placeholderTextColor="#7a7a7a"
                                     />
                                 </View>
+                                {emailError && <Text style={styles.errorText}>{emailError}</Text>}
                             </View>
 
                             <View style={styles.inputWrapper}>
                                 {Boolean(firstNameFocused || firstName) && (
                                     <Text style={styles.floatingLabel}>Prénom</Text>
                                 )}
-                                <View style={[styles.inputGroup, (firstNameFocused || firstName) && styles.inputGroupFocused]}>
+                                <View
+                                    style={[
+                                        styles.inputGroup,
+                                        (firstNameFocused || firstName) && styles.inputGroupFocused,
+                                        firstNameError && styles.inputGroupError,
+                                    ]}
+                                >
                                     <Ionicons name="person-outline" size={20} color="#000" style={styles.leadingIcon} />
                                     <TextInput
                                         style={styles.input}
                                         placeholder={firstNameFocused || firstName ? '' : 'Prénom'}
                                         autoCapitalize="words"
                                         value={firstName}
-                                        onChangeText={setFirstName}
+                                        onChangeText={(value) => {
+                                            setFirstName(value);
+                                            if (firstNameError) setFirstNameError(null);
+                                            if (formError) setFormError(null);
+                                            if (formInfo) setFormInfo(null);
+                                        }}
                                         onFocus={() => setFirstNameFocused(true)}
                                         onBlur={() => setFirstNameFocused(false)}
                                         placeholderTextColor="#7a7a7a"
                                     />
                                 </View>
+                                {firstNameError && <Text style={styles.errorText}>{firstNameError}</Text>}
                             </View>
 
                             <View style={styles.inputWrapper}>
                                 {Boolean(lastNameFocused || lastName) && (
                                     <Text style={styles.floatingLabel}>Nom</Text>
                                 )}
-                                <View style={[styles.inputGroup, (lastNameFocused || lastName) && styles.inputGroupFocused]}>
+                                <View
+                                    style={[
+                                        styles.inputGroup,
+                                        (lastNameFocused || lastName) && styles.inputGroupFocused,
+                                        lastNameError && styles.inputGroupError,
+                                    ]}
+                                >
                                     <Ionicons name="person-outline" size={20} color="#000" style={styles.leadingIcon} />
                                     <TextInput
                                         style={styles.input}
                                         placeholder={lastNameFocused || lastName ? '' : 'Nom'}
                                         autoCapitalize="words"
                                         value={lastName}
-                                        onChangeText={setLastName}
+                                        onChangeText={(value) => {
+                                            setLastName(value);
+                                            if (lastNameError) setLastNameError(null);
+                                            if (formError) setFormError(null);
+                                            if (formInfo) setFormInfo(null);
+                                        }}
                                         onFocus={() => setLastNameFocused(true)}
                                         onBlur={() => setLastNameFocused(false)}
                                         placeholderTextColor="#7a7a7a"
                                     />
                                 </View>
+                                {lastNameError && <Text style={styles.errorText}>{lastNameError}</Text>}
                             </View>
 
                             <View style={styles.inputWrapper}>
                                 {Boolean(usernameFocused || username) && (
                                     <Text style={styles.floatingLabel}>Identifiant</Text>
                                 )}
-                                <View style={[styles.inputGroup, (usernameFocused || username) && styles.inputGroupFocused]}>
+                                <View
+                                    style={[
+                                        styles.inputGroup,
+                                        (usernameFocused || username) && styles.inputGroupFocused,
+                                        usernameError && styles.inputGroupError,
+                                    ]}
+                                >
                                     <Ionicons name="at-outline" size={20} color="#000" style={styles.leadingIcon} />
                                     <TextInput
                                         style={styles.input}
                                         placeholder={usernameFocused || username ? '' : 'Identifiant'}
                                         autoCapitalize="none"
                                         value={username}
-                                        onChangeText={setUsername}
+                                        onChangeText={(value) => {
+                                            setUsername(value);
+                                            if (usernameError) setUsernameError(null);
+                                            if (formError) setFormError(null);
+                                            if (formInfo) setFormInfo(null);
+                                        }}
                                         onFocus={() => setUsernameFocused(true)}
                                         onBlur={() => setUsernameFocused(false)}
                                         placeholderTextColor="#7a7a7a"
                                     />
                                 </View>
+                                {usernameError && <Text style={styles.errorText}>{usernameError}</Text>}
                             </View>
 
                             <View style={styles.inputWrapper}>
                                 {Boolean(passwordFocused || password) && (
                                     <Text style={styles.floatingLabel}>Mot de passe</Text>
                                 )}
-                                <View style={[styles.inputGroup, (passwordFocused || password) && styles.inputGroupFocused]}>
+                                <View
+                                    style={[
+                                        styles.inputGroup,
+                                        (passwordFocused || password) && styles.inputGroupFocused,
+                                        passwordError && styles.inputGroupError,
+                                    ]}
+                                >
                                     <Ionicons name="lock-closed-outline" size={20} color="#000" style={styles.leadingIcon} />
                                     <TextInput
                                         style={styles.input}
                                         placeholder={passwordFocused || password ? '' : 'Mot de passe'}
                                         secureTextEntry={obscurePassword}
                                         value={password}
-                                        onChangeText={setPassword}
+                                        onChangeText={(value) => {
+                                            setPassword(value);
+                                            if (passwordError) setPasswordError(null);
+                                            if (formError) setFormError(null);
+                                            if (formInfo) setFormInfo(null);
+                                        }}
                                         onFocus={() => setPasswordFocused(true)}
                                         onBlur={() => setPasswordFocused(false)}
                                         placeholderTextColor="#7a7a7a"
@@ -203,13 +303,20 @@ export default function RegisterScreen() {
                                         />
                                     </TouchableOpacity>
                                 </View>
+                                {passwordError && <Text style={styles.errorText}>{passwordError}</Text>}
                             </View>
 
                             <View style={styles.inputWrapper}>
                                 {Boolean(phoneFocused || phoneNumber) && (
                                     <Text style={styles.floatingLabel}>Numéro de téléphone</Text>
                                 )}
-                                <View style={[styles.inputGroup, (phoneFocused || phoneNumber) && styles.inputGroupFocused]}>
+                                <View
+                                    style={[
+                                        styles.inputGroup,
+                                        (phoneFocused || phoneNumber) && styles.inputGroupFocused,
+                                        phoneError && styles.inputGroupError,
+                                    ]}
+                                >
                                     <Ionicons name="call-outline" size={20} color="#000" style={styles.leadingIcon} />
                                     <TouchableOpacity 
                                         style={styles.countryCodeButton}
@@ -223,33 +330,52 @@ export default function RegisterScreen() {
                                         placeholder={phoneFocused || phoneNumber ? '' : 'Numéro de téléphone'}
                                         keyboardType="phone-pad"
                                         value={phoneNumber}
-                                        onChangeText={setPhoneNumber}
+                                        onChangeText={(value) => {
+                                            setPhoneNumber(value);
+                                            if (phoneError) setPhoneError(null);
+                                            if (formError) setFormError(null);
+                                            if (formInfo) setFormInfo(null);
+                                        }}
                                         onFocus={() => setPhoneFocused(true)}
                                         onBlur={() => setPhoneFocused(false)}
                                         placeholderTextColor="#7a7a7a"
                                     />
                                 </View>
+                                {phoneError && <Text style={styles.errorText}>{phoneError}</Text>}
                             </View>
 
                             <View style={styles.inputWrapper}>
                                 {Boolean(descriptionFocused || description) && (
                                     <Text style={styles.floatingLabel}>Description</Text>
                                 )}
-                                <View style={[styles.inputGroup, (descriptionFocused || description) && styles.inputGroupFocused]}>
+                                <View
+                                    style={[
+                                        styles.inputGroup,
+                                        (descriptionFocused || description) && styles.inputGroupFocused,
+                                        descriptionError && styles.inputGroupError,
+                                    ]}
+                                >
                                     <Ionicons name="chatbubble-outline" size={20} color="#000" style={styles.leadingIcon} />
                                     <TextInput
                                         style={styles.input}
                                         placeholder={descriptionFocused || description ? '' : 'Parlez-nous de vous...'}
                                         multiline
                                         value={description}
-                                        onChangeText={setDescription}
+                                        onChangeText={(value) => {
+                                            setDescription(value);
+                                            if (descriptionError) setDescriptionError(null);
+                                            if (formError) setFormError(null);
+                                            if (formInfo) setFormInfo(null);
+                                        }}
                                         onFocus={() => setDescriptionFocused(true)}
                                         onBlur={() => setDescriptionFocused(false)}
                                         placeholderTextColor="#7a7a7a"
                                     />
                                 </View>
+                                {descriptionError && <Text style={styles.errorText}>{descriptionError}</Text>}
                             </View>
-
+                            {formError && <Text style={styles.formErrorText}>{formError}</Text>}
+                            {formInfo && <Text style={styles.formInfoText}>{formInfo}</Text>}
                             <TouchableOpacity style={styles.primaryButton} onPress={handleRegister} disabled={loading}>
                                 <LinearGradient
                                     colors={['#FFA92E', '#FF5D1E']}
@@ -275,12 +401,7 @@ export default function RegisterScreen() {
                                 <TouchableOpacity
                                     style={styles.socialIconButton}
                                     onPress={() => {
-                                        Toast.show({
-                                            text1: 'Tentative d\'inscription avec Google',
-                                            position: 'bottom',
-                                            icon: <Ionicons name="logo-google" size={24} color="#4285F4" />,
-                                            iconColor: '#4285F4',
-                                        });
+                                        setFormInfo('Inscription Google bientôt disponible.');
                                     }}
                                 >
                                     <Image
@@ -292,12 +413,7 @@ export default function RegisterScreen() {
                                 <TouchableOpacity
                                     style={styles.socialIconButton}
                                     onPress={() => {
-                                        Toast.show({
-                                            text1: 'Tentative d\'inscription avec Apple',
-                                            position: 'bottom',
-                                            icon: <Ionicons name="logo-apple" size={24} color="#000" />,
-                                            iconColor: '#000',
-                                        });
+                                        setFormInfo('Inscription Apple bientôt disponible.');
                                     }}
                                 >
                                     <Ionicons name="logo-apple" size={26} color="#000" />
@@ -351,7 +467,6 @@ export default function RegisterScreen() {
                 </View>
             </Modal>
 
-            <ToastManager />
         </>
     );
 }
@@ -417,6 +532,9 @@ const styles = StyleSheet.create({
     inputGroupFocused: {
         borderColor: '#FF8A00',
     },
+    inputGroupError: {
+        borderColor: '#E53935',
+    },
     leadingIcon: {
         marginRight: 12,
     },
@@ -424,6 +542,29 @@ const styles = StyleSheet.create({
         flex: 1,
         fontSize: 16,
         color: '#000',
+    },
+    errorText: {
+        marginTop: 6,
+        marginLeft: 8,
+        color: '#E53935',
+        fontSize: 12,
+        fontWeight: '600',
+    },
+    formErrorText: {
+        marginTop: 4,
+        marginBottom: 12,
+        textAlign: 'center',
+        color: '#E53935',
+        fontSize: 12,
+        fontWeight: '600',
+    },
+    formInfoText: {
+        marginTop: 4,
+        marginBottom: 12,
+        textAlign: 'center',
+        color: '#1976D2',
+        fontSize: 12,
+        fontWeight: '600',
     },
     dateRow: {
         flexDirection: 'row',

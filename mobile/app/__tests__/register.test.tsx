@@ -1,7 +1,14 @@
 import { fireEvent, render, waitFor } from '@testing-library/react-native';
 import React from 'react';
-import { Toast } from 'toastify-react-native';
 import RegisterScreen from '../register';
+import apiService from '../../services/api';
+
+jest.mock('../../services/api', () => ({
+    __esModule: true,
+    default: {
+        register: jest.fn().mockResolvedValue({}),
+    },
+}));
 
 describe('RegisterScreen', () => {
     beforeEach(() => {
@@ -31,7 +38,7 @@ describe('RegisterScreen', () => {
         });
     });
 
-    it('displays error toast for invalid email', async () => {
+    it('displays inline error for invalid email', async () => {
         const { getByPlaceholderText, getAllByText } = render(<RegisterScreen />);
 
         const emailInput = getByPlaceholderText('Adresse e-mail');
@@ -42,82 +49,76 @@ describe('RegisterScreen', () => {
         fireEvent.press(registerButton);
 
         await waitFor(() => {
-            expect(Toast.show).toHaveBeenCalledWith(
-                expect.objectContaining({
-                    text1: 'Adresse e-mail invalide',
-                    position: 'bottom',
-                })
-            );
+            expect(getAllByText('Adresse e-mail invalide').length).toBeGreaterThan(0);
         });
     });
 
-    it('displays error toast for short username', async () => {
+    it('displays inline error for short username', async () => {
         const { getByPlaceholderText, getAllByText } = render(<RegisterScreen />);
 
         const emailInput = getByPlaceholderText('Adresse e-mail');
+        const firstNameInput = getByPlaceholderText('Prénom');
+        const lastNameInput = getByPlaceholderText('Nom');
         const usernameInput = getByPlaceholderText('Identifiant');
         const registerButtons = getAllByText('Inscription');
         const registerButton = registerButtons[1];
 
         fireEvent.changeText(emailInput, 'test@example.com');
+        fireEvent.changeText(firstNameInput, 'Jean');
+        fireEvent.changeText(lastNameInput, 'Dupont');
         fireEvent.changeText(usernameInput, 'ab');
         fireEvent.press(registerButton);
 
         await waitFor(() => {
-            expect(Toast.show).toHaveBeenCalledWith(
-                expect.objectContaining({
-                    text1: "L'identifiant doit contenir au moins 3 caractères",
-                    position: 'bottom',
-                })
-            );
+            expect(getAllByText("L'identifiant doit contenir au moins 3 caractères").length).toBeGreaterThan(0);
         });
     });
 
-    it('displays error toast for short password', async () => {
+    it('displays inline error for short password', async () => {
         const { getByPlaceholderText, getAllByText } = render(<RegisterScreen />);
 
         const emailInput = getByPlaceholderText('Adresse e-mail');
+        const firstNameInput = getByPlaceholderText('Prénom');
+        const lastNameInput = getByPlaceholderText('Nom');
         const usernameInput = getByPlaceholderText('Identifiant');
         const passwordInput = getByPlaceholderText('Mot de passe');
         const registerButtons = getAllByText('Inscription');
         const registerButton = registerButtons[1];
 
         fireEvent.changeText(emailInput, 'test@example.com');
+        fireEvent.changeText(firstNameInput, 'Jean');
+        fireEvent.changeText(lastNameInput, 'Dupont');
         fireEvent.changeText(usernameInput, 'testuser');
         fireEvent.changeText(passwordInput, '123');
         fireEvent.press(registerButton);
 
         await waitFor(() => {
-            expect(Toast.show).toHaveBeenCalledWith(
-                expect.objectContaining({
-                    text1: 'Le mot de passe doit contenir au moins 8 caractères',
-                    position: 'bottom',
-                })
-            );
+            expect(getAllByText('Le mot de passe doit contenir au moins 8 caractères').length).toBeGreaterThan(0);
         });
     });
 
-    it('displays error toast for missing birthdate', async () => {
+    it('displays inline error for missing description', async () => {
         const { getByPlaceholderText, getAllByText } = render(<RegisterScreen />);
 
         const emailInput = getByPlaceholderText('Adresse e-mail');
+        const firstNameInput = getByPlaceholderText('Prénom');
+        const lastNameInput = getByPlaceholderText('Nom');
         const usernameInput = getByPlaceholderText('Identifiant');
         const passwordInput = getByPlaceholderText('Mot de passe');
+        const phoneInput = getByPlaceholderText('Numéro de téléphone');
         const registerButtons = getAllByText('Inscription');
         const registerButton = registerButtons[1];
 
         fireEvent.changeText(emailInput, 'test@example.com');
+        fireEvent.changeText(firstNameInput, 'Jean');
+        fireEvent.changeText(lastNameInput, 'Dupont');
         fireEvent.changeText(usernameInput, 'testuser');
         fireEvent.changeText(passwordInput, 'password123');
+        fireEvent.changeText(phoneInput, '0612345678');
         fireEvent.press(registerButton);
 
         await waitFor(() => {
-            expect(Toast.show).toHaveBeenCalledWith(
-                expect.objectContaining({
-                    text1: 'Veuillez entrer votre date de naissance',
-                    position: 'bottom',
-                })
-            );
+            expect(getAllByText('La description requis').length).toBeGreaterThan(0);
         });
     });
 
@@ -125,45 +126,26 @@ describe('RegisterScreen', () => {
         const { getByPlaceholderText, getAllByText } = render(<RegisterScreen />);
 
         const emailInput = getByPlaceholderText('Adresse e-mail');
+        const firstNameInput = getByPlaceholderText('Prénom');
+        const lastNameInput = getByPlaceholderText('Nom');
         const usernameInput = getByPlaceholderText('Identifiant');
         const passwordInput = getByPlaceholderText('Mot de passe');
-        const dayInput = getByPlaceholderText('Jour');
-        const monthInput = getByPlaceholderText('Mois');
-        const yearInput = getByPlaceholderText('Année');
+        const phoneInput = getByPlaceholderText('Numéro de téléphone');
+        const descriptionInput = getByPlaceholderText('Parlez-nous de vous...');
         const registerButtons = getAllByText('Inscription');
         const registerButton = registerButtons[1];
 
         fireEvent.changeText(emailInput, 'test@example.com');
+        fireEvent.changeText(firstNameInput, 'Jean');
+        fireEvent.changeText(lastNameInput, 'Dupont');
         fireEvent.changeText(usernameInput, 'testuser');
-        fireEvent.changeText(passwordInput, 'password123');
-        fireEvent.changeText(dayInput, '15');
-        fireEvent.changeText(monthInput, '06');
-        fireEvent.changeText(yearInput, '1990');
+        fireEvent.changeText(passwordInput, 'Password123!');
+        fireEvent.changeText(phoneInput, '0612345678');
+        fireEvent.changeText(descriptionInput, 'Description valide pour inscription.');
         fireEvent.press(registerButton);
 
         await waitFor(() => {
-            expect(Toast.show).toHaveBeenCalledWith(
-                expect.objectContaining({
-                    text1: 'Inscription réussie !',
-                    position: 'bottom',
-                })
-            );
+            expect(apiService.register).toHaveBeenCalled();
         });
-    });
-
-    it('handles date input correctly', () => {
-        const { getByPlaceholderText } = render(<RegisterScreen />);
-
-        const dayInput = getByPlaceholderText('Jour');
-        const monthInput = getByPlaceholderText('Mois');
-        const yearInput = getByPlaceholderText('Année');
-
-        fireEvent.changeText(dayInput, '25');
-        fireEvent.changeText(monthInput, '12');
-        fireEvent.changeText(yearInput, '2000');
-
-        expect(dayInput.props.value).toBe('25');
-        expect(monthInput.props.value).toBe('12');
-        expect(yearInput.props.value).toBe('2000');
     });
 });

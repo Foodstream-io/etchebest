@@ -3,10 +3,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import ToastManager, { Toast } from 'toastify-react-native';
 import apiService from '../services/api';
 import authService from '../services/auth';
-import toast from '../utils/toast';
 import { validateEmail, validatePassword } from '../utils/validation';
 
 
@@ -17,19 +15,27 @@ export default function LoginScreen() {
     const [emailFocused, setEmailFocused] = useState(false);
     const [passwordFocused, setPasswordFocused] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [emailError, setEmailError] = useState<string | null>(null);
+    const [passwordError, setPasswordError] = useState<string | null>(null);
+    const [formError, setFormError] = useState<string | null>(null);
+    const [formInfo, setFormInfo] = useState<string | null>(null);
 
     const router = useRouter();
 
     const handleLogin = async () => {
+        setFormError(null);
+        setFormInfo(null);
+        setEmailError(null);
+        setPasswordError(null);
         const emailValidation = validateEmail(email);
         if (!emailValidation.isValid) {
-            toast.error(emailValidation.error ?? 'Erreur de validation de l\'email');
+            setEmailError(emailValidation.error ?? "Erreur de validation de l'email");
             return;
         }
 
         const passwordValidation = validatePassword(password);
         if (!passwordValidation.isValid) {
-            toast.error(passwordValidation.error ?? 'Erreur de validation du mot de passe');
+            setPasswordError(passwordValidation.error ?? 'Erreur de validation du mot de passe');
             return;
         }
 
@@ -38,19 +44,17 @@ export default function LoginScreen() {
             const response = await apiService.login({ email, password });
             await authService.saveAuth(response.token, response.user);
 
-            toast.success('Connexion réussie !');
             router.replace('/');
         } catch (error) {
             console.error('Login error:', error instanceof Error ? error.message : 'Unknown error');
-            toast.error(error instanceof Error ? error.message : 'Erreur de connexion');
+            setFormError(error instanceof Error ? error.message : 'Erreur de connexion');
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <>
-            <View style={styles.background}>
+        <View style={styles.background}>
                 <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
                     <View style={styles.card}>
                         <Text style={styles.heading}>Connexion</Text>
@@ -60,7 +64,13 @@ export default function LoginScreen() {
                                 {Boolean(emailFocused || email) && (
                                     <Text style={styles.floatingLabel}>Adresse e-mail</Text>
                                 )}
-                                <View style={[styles.inputGroup, (emailFocused || email) && styles.inputGroupFocused]}>
+                                <View
+                                    style={[
+                                        styles.inputGroup,
+                                        (emailFocused || email) && styles.inputGroupFocused,
+                                        emailError && styles.inputGroupError,
+                                    ]}
+                                >
                                     <Ionicons name="mail-outline" size={20} color="#000" style={styles.leadingIcon} />
                                     <TextInput
                                         style={styles.input}
@@ -68,25 +78,42 @@ export default function LoginScreen() {
                                         keyboardType="email-address"
                                         autoCapitalize="none"
                                         value={email}
-                                        onChangeText={setEmail}
+                                        onChangeText={(value) => {
+                                            setEmail(value);
+                                            if (emailError) setEmailError(null);
+                                            if (formError) setFormError(null);
+                                            if (formInfo) setFormInfo(null);
+                                        }}
                                         onFocus={() => setEmailFocused(true)}
                                         onBlur={() => setEmailFocused(false)}
                                         placeholderTextColor="#7a7a7a"
                                     />
                                 </View>
+                                {emailError && <Text style={styles.errorText}>{emailError}</Text>}
                             </View>
                             <View style={styles.inputWrapper}>
                                 {Boolean(passwordFocused || password) && (
                                     <Text style={styles.floatingLabel}>Mot de passe</Text>
                                 )}
-                                <View style={[styles.inputGroup, (passwordFocused || password) && styles.inputGroupFocused]}>
+                                <View
+                                    style={[
+                                        styles.inputGroup,
+                                        (passwordFocused || password) && styles.inputGroupFocused,
+                                        passwordError && styles.inputGroupError,
+                                    ]}
+                                >
                                     <Ionicons name="lock-closed-outline" size={20} color="#000" style={styles.leadingIcon} />
                                     <TextInput
                                         style={styles.input}
                                         placeholder={passwordFocused || password ? '' : 'Mot de passe'}
                                         secureTextEntry={obscurePassword}
                                         value={password}
-                                        onChangeText={setPassword}
+                                        onChangeText={(value) => {
+                                            setPassword(value);
+                                            if (passwordError) setPasswordError(null);
+                                            if (formError) setFormError(null);
+                                            if (formInfo) setFormInfo(null);
+                                        }}
                                         onFocus={() => setPasswordFocused(true)}
                                         onBlur={() => setPasswordFocused(false)}
                                         placeholderTextColor="#7a7a7a"
@@ -99,7 +126,10 @@ export default function LoginScreen() {
                                         />
                                     </TouchableOpacity>
                                 </View>
+                                {passwordError && <Text style={styles.errorText}>{passwordError}</Text>}
                             </View>
+                            {formError && <Text style={styles.formErrorText}>{formError}</Text>}
+                            {formInfo && <Text style={styles.formInfoText}>{formInfo}</Text>}
                             <TouchableOpacity style={styles.primaryButton} onPress={handleLogin} disabled={loading}>
                                 <LinearGradient
                                     colors={['#FFA92E', '#FF5D1E']}
@@ -122,12 +152,7 @@ export default function LoginScreen() {
                             <TouchableOpacity
                                 style={styles.socialButton}
                                 onPress={() => {
-                                    Toast.show({
-                                        text1: 'Tentative de connexion avec Google',
-                                        position: 'bottom',
-                                        icon: <Ionicons name="logo-google" size={24} color="#4285F4" />,
-                                        iconColor: '#4285F4',
-                                    });
+                                    setFormInfo('Connexion Google bientôt disponible.');
                                 }}
                             >
                                 <View style={styles.socialButtonContent}>
@@ -144,12 +169,7 @@ export default function LoginScreen() {
                             <TouchableOpacity
                                 style={styles.socialButton}
                                 onPress={() => {
-                                    Toast.show({
-                                        text1: 'Tentative de connexion avec Apple',
-                                        position: 'bottom',
-                                        icon: <Ionicons name="logo-apple" size={24} color="#000" />,
-                                        iconColor: '#000',
-                                    });
+                                    setFormInfo('Connexion Apple bientôt disponible.');
                                 }}
                             >
                                 <View style={styles.socialButtonContent}>
@@ -171,9 +191,7 @@ export default function LoginScreen() {
                         </View>
                     </View>
                 </ScrollView>
-            </View>
-            <ToastManager />
-        </>
+        </View>
     );
 }
 
@@ -238,6 +256,9 @@ const styles = StyleSheet.create({
     inputGroupFocused: {
         borderColor: '#FF8A00',
     },
+    inputGroupError: {
+        borderColor: '#E53935',
+    },
     leadingIcon: {
         marginRight: 12,
     },
@@ -245,6 +266,29 @@ const styles = StyleSheet.create({
         flex: 1,
         fontSize: 16,
         color: '#000',
+    },
+    errorText: {
+        marginTop: 6,
+        marginLeft: 8,
+        color: '#E53935',
+        fontSize: 12,
+        fontWeight: '600',
+    },
+    formErrorText: {
+        marginTop: 4,
+        marginBottom: 12,
+        textAlign: 'center',
+        color: '#E53935',
+        fontSize: 12,
+        fontWeight: '600',
+    },
+    formInfoText: {
+        marginTop: 4,
+        marginBottom: 12,
+        textAlign: 'center',
+        color: '#1976D2',
+        fontSize: 12,
+        fontWeight: '600',
     },
     linkText: {
         textDecorationLine: 'underline',
