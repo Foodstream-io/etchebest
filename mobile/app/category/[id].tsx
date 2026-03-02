@@ -12,7 +12,7 @@ import {
   View,
 } from 'react-native';
 import ToastManager from 'toastify-react-native';
-import apiService, { Category, CategoryLivesResponse, Live } from '../../services/api';
+import apiService, { CategoryLivesResponse, Live } from '../../services/api';
 import toast from '../../utils/toast';
 
 export default function CategoryLivesScreen() {
