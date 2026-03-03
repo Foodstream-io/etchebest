@@ -113,7 +113,7 @@ describe('RegisterScreen', () => {
         fireEvent.changeText(firstNameInput, 'Jean');
         fireEvent.changeText(lastNameInput, 'Dupont');
         fireEvent.changeText(usernameInput, 'testuser');
-        fireEvent.changeText(passwordInput, 'password123');
+        fireEvent.changeText(passwordInput, 'Password123!');
         fireEvent.changeText(phoneInput, '0612345678');
         fireEvent.press(registerButton);
 
