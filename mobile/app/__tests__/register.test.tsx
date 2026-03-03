@@ -118,7 +118,7 @@ describe('RegisterScreen', () => {
         fireEvent.press(registerButton);
 
         await waitFor(() => {
-            expect(getAllByText('La description requis').length).toBeGreaterThan(0);
+            expect(getAllByText('La description requise').length).toBeGreaterThan(0);
         });
     });
 
