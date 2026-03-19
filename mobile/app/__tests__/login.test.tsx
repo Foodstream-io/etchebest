@@ -98,19 +98,25 @@ describe('LoginScreen', () => {
 
         // Password should be obscured by default
         expect(passwordInput.props.secureTextEntry).toBe(true);
-    }); it('renders forgot password link', () => {
+    });
+
+    it('renders forgot password link', () => {
         const { getByText } = render(<LoginScreen />);
         const forgotPasswordLink = getByText('Mot de passe oublié ?');
 
         expect(forgotPasswordLink).toBeTruthy();
         fireEvent.press(forgotPasswordLink);
-    }); it('renders register link', () => {
+    });
+
+    it('renders register link', () => {
         const { getByText } = render(<LoginScreen />);
         const registerLink = getByText('Inscrivez-vous');
 
         expect(registerLink).toBeTruthy();
         fireEvent.press(registerLink);
-    }); it('submits login on valid credentials', async () => {
+    });
+
+    it('submits login on valid credentials', async () => {
         const { getByPlaceholderText, getByText } = render(<LoginScreen />);
 
         const emailInput = getByPlaceholderText('Adresse e-mail');
@@ -127,7 +133,9 @@ describe('LoginScreen', () => {
                 password: 'Password123!',
             });
         });
-    }); it('shows inline info when Google login is pressed', async () => {
+    });
+
+    it('shows inline info when Google login is pressed', async () => {
         const { getByText } = render(<LoginScreen />);
         const googleButton = getByText('Continuer avec Google');
 
