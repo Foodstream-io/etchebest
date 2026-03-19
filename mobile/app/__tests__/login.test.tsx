@@ -118,13 +118,13 @@ describe('LoginScreen', () => {
         const loginButton = getByText('Se connecter');
 
         fireEvent.changeText(emailInput, 'test@example.com');
-        fireEvent.changeText(passwordInput, 'password123');
+        fireEvent.changeText(passwordInput, 'Password123!');
         fireEvent.press(loginButton);
 
         await waitFor(() => {
             expect(apiService.login).toHaveBeenCalledWith({
                 email: 'test@example.com',
-                password: 'password123',
+                password: 'Password123!',
             });
         });
     }); it('shows inline info when Google login is pressed', async () => {
