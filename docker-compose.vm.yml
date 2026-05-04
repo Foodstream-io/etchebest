@@ -22,12 +22,9 @@ services:
       - postgres
     build: ./backend
     env_file: ./.env
-    ports:
-      - '${BACKEND_PORT}:${BACKEND_PORT}'
-    networks:
-      - back-network
+    network_mode: "host"
     environment:
-      POSTGRES_HOST: postgres
+      POSTGRES_HOST: localhost
       POSTGRES_PORT: ${POSTGRES_PORT}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -44,12 +41,9 @@ services:
     build:
       context: ./front-web
       dockerfile: Dockerfile
-    ports:
-      - '3000:3000'
-    networks:
-      - back-network
+    network_mode: "host"
     environment:
-      NEXT_PUBLIC_API_BASE_URL: http://backend:8081/api
+      NEXT_PUBLIC_API_BASE_URL: http://${VM_IP}:8081/api
     restart: unless-stopped
 
 
