@@ -1,12 +1,18 @@
 import type { NextConfig } from "next";
 import path from "path";
 
+const backendInternalBaseUrl = (
+  process.env.INTERNAL_API_BASE_URL ||
+  process.env.BACKEND_INTERNAL_URL ||
+  "http://localhost:8081"
+).replace(/\/+$/, "");
+
 const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
         source: "/api/:path*",
-        destination: "http://localhost:8081/api/:path*", // Proxy to Backend
+        destination: `${backendInternalBaseUrl}/api/:path*`,
       },
     ];
   },

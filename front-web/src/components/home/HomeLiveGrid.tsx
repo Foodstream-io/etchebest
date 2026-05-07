@@ -29,6 +29,22 @@ type CardItem = {
   isLive?: boolean;
 };
 
+function toCardItem(
+  room: RoomInfo,
+  badge: string,
+  isLive: boolean,
+  author: string
+): CardItem {
+  return {
+    id: room.id,
+    badge,
+    title: room.name || "Live sans titre",
+    author,
+    viewers: room.viewers ?? 0,
+    isLive,
+  };
+}
+
 const TABS: { key: TabKey; label: string; icon: React.ReactNode }[] = [
   { key: "live", label: "En direct", icon: <Flame className="h-4 w-4" /> },
   { key: "popular", label: "Populaires", icon: <Star className="h-4 w-4" /> },
@@ -105,43 +121,24 @@ export default function HomeLiveGrid() {
   }, [ready, token]);
 
   const liveItems = useMemo<CardItem[]>(() => {
-    return rooms
-      .filter((room) => room.status === "live")
-      .map((room) => ({
-      id: room.id,
-      badge: "Live",
-      title: room.name || "Live sans titre",
-      author: room.author?.username || room.author?.firstName || authorName,
-      viewers: room.viewers ?? 0,
-      isLive: true,
-    }));
+    return rooms.map((room) => toCardItem(room, "Live", true, authorName));
   }, [rooms, authorName]);
 
   const plannedItems = useMemo<CardItem[]>(() => {
-    return rooms
-      .filter((room) => room.status === "scheduled")
-      .map((room) => ({
-      id: room.id,
+    return UPCOMING.map((item) => ({
+      id: item.id,
       badge: "Planifié",
-      title: room.name || "Live sans titre",
-      author: room.author?.username || room.author?.firstName || authorName,
-      viewers: 0,
-      when: room.scheduledAt ? new Date(room.scheduledAt).toLocaleString() : undefined,
+      title: item.title,
+      author: item.author,
+      when: item.when,
       isLive: false,
     }));
-  }, [rooms, authorName]);
+  }, []);
 
   const replayItems = useMemo<CardItem[]>(() => {
-    return rooms
-      .filter((room) => room.status === "completed")
-      .map((room) => ({
-      id: room.id,
-      badge: "Replay",
-      title: room.name || "Live sans titre",
-      author: room.author?.username || room.author?.firstName || authorName,
-      viewers: room.viewers ?? 0,
-      isLive: false,
-    }));
+    return [...rooms]
+      .sort((a, b) => (b.viewers ?? 0) - (a.viewers ?? 0))
+      .map((room) => toCardItem(room, "Replay", false, authorName));
   }, [rooms, authorName]);
 
   const items = useMemo(() => {
