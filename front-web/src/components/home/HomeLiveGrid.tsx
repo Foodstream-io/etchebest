@@ -105,13 +105,42 @@ export default function HomeLiveGrid() {
   }, [ready, token]);
 
   const liveItems = useMemo<CardItem[]>(() => {
-    return rooms.map((room) => ({
+    return rooms
+      .filter((room) => room.status === "live")
+      .map((room) => ({
       id: room.id,
       badge: "Live",
       title: room.name || "Live sans titre",
-      author: authorName,
+      author: room.author?.username || room.author?.firstName || authorName,
       viewers: room.viewers ?? 0,
       isLive: true,
+    }));
+  }, [rooms, authorName]);
+
+  const plannedItems = useMemo<CardItem[]>(() => {
+    return rooms
+      .filter((room) => room.status === "scheduled")
+      .map((room) => ({
+      id: room.id,
+      badge: "Planifié",
+      title: room.name || "Live sans titre",
+      author: room.author?.username || room.author?.firstName || authorName,
+      viewers: 0,
+      when: room.scheduledAt ? new Date(room.scheduledAt).toLocaleString() : undefined,
+      isLive: false,
+    }));
+  }, [rooms, authorName]);
+
+  const replayItems = useMemo<CardItem[]>(() => {
+    return rooms
+      .filter((room) => room.status === "completed")
+      .map((room) => ({
+      id: room.id,
+      badge: "Replay",
+      title: room.name || "Live sans titre",
+      author: room.author?.username || room.author?.firstName || authorName,
+      viewers: room.viewers ?? 0,
+      isLive: false,
     }));
   }, [rooms, authorName]);
 
@@ -122,13 +151,13 @@ export default function HomeLiveGrid() {
       case "popular":
         return [...liveItems].sort((a, b) => (b.viewers ?? 0) - (a.viewers ?? 0));
       case "replays":
-        return [];
+        return replayItems;
       case "planned":
-        return [];
+        return plannedItems;
       default:
         return liveItems;
     }
-  }, [tab, liveItems]);
+  }, [tab, liveItems, replayItems, plannedItems]);
 
   return (
     <section className="pb-14 pt-8">

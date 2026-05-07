@@ -58,8 +58,8 @@ function isTokenValid(token: string): boolean {
   }
 }
 
-export function middleware(req: NextRequest) {
-  console.log("MIDDLEWARE EXECUTED:", req.nextUrl.pathname);
+export function proxy(req: NextRequest) {
+  console.log("PROXY EXECUTED:", req.nextUrl.pathname);
 
   const { pathname } = req.nextUrl;
 

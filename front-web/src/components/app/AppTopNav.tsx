@@ -49,6 +49,7 @@ export default function AppTopNav() {
                 src="/logo.png"
                 alt="Foodstream"
                 fill
+                sizes="150px"
                 className="object-contain p-2"
               />
             </div>
@@ -131,6 +132,7 @@ export default function AppTopNav() {
                     src={user.profileImageUrl}
                     alt={user.username || user.email || "Profil"}
                     fill
+                    sizes="32px"
                     className="object-cover"
                   />
                 ) : (

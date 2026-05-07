@@ -47,7 +47,7 @@ export default function StudioPreviewCard({
             ))}
           </div>
 
-          <p className="line-clamp-2 text-sm font-semibold tracking-tight text-gray-900 dark:text-gray-50">
+          <p className="line-clamp-2 text-sm font-semibold tracking-tight text-gray-900 break-words dark:text-gray-50">
             {previewTitle}
           </p>
 

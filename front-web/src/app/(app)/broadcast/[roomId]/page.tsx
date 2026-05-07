@@ -135,7 +135,7 @@ export default function BroadcastRoomPage() {
     !!roomIdFromUrl;
 
   const fetchChat = useCallback(async () => {
-    if (!displayRoom) return;
+    if (!displayRoom || !token) return;
 
     try {
       const msgs = await getChatMessages(
