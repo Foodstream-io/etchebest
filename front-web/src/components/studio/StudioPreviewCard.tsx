@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { ImageIcon } from "lucide-react";
 import formatPreviewDate from "@/components/studio/formatPreviewDate";
 
 export default function StudioPreviewCard({
@@ -22,13 +23,22 @@ export default function StudioPreviewCard({
 
       <div className="overflow-hidden rounded-2xl border border-black/8 bg-black/[0.03] dark:border-white/10 dark:bg-white/[0.04]">
         <div className="relative h-44 w-full">
-          <Image
-            src={safeImage}
-            alt={previewTitle}
-            fill
-            className="object-cover"
-            unoptimized
-          />
+          {safeImage ? (
+            <Image
+              src={safeImage}
+              alt={previewTitle}
+              fill
+              className="object-cover"
+              unoptimized
+            />
+          ) : (
+            <div className="flex h-full w-full flex-col items-center justify-center bg-gradient-to-br from-orange-100 to-orange-50 text-orange-300 dark:from-orange-950/40 dark:to-orange-950/10 dark:text-orange-900/50">
+              <ImageIcon className="mb-2 h-10 w-10" />
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-orange-400 dark:text-orange-800">
+                Aperçu
+              </span>
+            </div>
+          )}
           <span className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-orange-500 px-2.5 py-1 text-[11px] font-bold text-white shadow-sm">
             <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-white" />
             LIVE
