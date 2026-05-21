@@ -37,8 +37,7 @@ type User struct {
 	LastLiveAt         *time.Time     `json:"lastLiveAt" gorm:"index:idx_user_last_live"`
 	// OAuth fields
 	GoogleID      *string `json:"googleId" gorm:"index:idx_user_google"`
-	FacebookID    *string `json:"facebookId" gorm:"index:idx_user_facebook"`
-	OAuthProvider *string `json:"oauthProvider"` // "google" or "facebook"
+	OAuthProvider *string `json:"oauthProvider"` // "google"
 }
 
 type UserPatch struct {

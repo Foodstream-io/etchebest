@@ -32,10 +32,6 @@ func Routes(r *gin.Engine, db *gorm.DB, jwtToken string, stunServerURL string, w
 	googleClientSecret := os.Getenv("GOOGLE_CLIENT_SECRET")
 	googleRedirectURI := os.Getenv("GOOGLE_REDIRECT_URI")
 
-	// facebookAppID := os.Getenv("FACEBOOK_APP_ID")
-	// facebookAppSecret := os.Getenv("FACEBOOK_APP_SECRET")
-	// facebookRedirectURI := os.Getenv("FACEBOOK_REDIRECT_URI")
-
 	// Health check / root endpoint
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
@@ -65,14 +61,8 @@ func Routes(r *gin.Engine, db *gorm.DB, jwtToken string, stunServerURL string, w
 		r.POST("/api/auth/google/callback", auth.GoogleCallback(db, bJwtToken, googleClientID, googleClientSecret, googleRedirectURI))
 	}
 
-	// if facebookAppID != "" && facebookAppSecret != "" && facebookRedirectURI != "" {
-	// 	r.GET("/api/auth/facebook/callback", auth.FacebookCallback(db, bJwtToken, facebookAppID, facebookAppSecret, facebookRedirectURI))
-	// 	r.POST("/api/auth/facebook/callback", auth.FacebookCallback(db, bJwtToken, facebookAppID, facebookAppSecret, facebookRedirectURI))
-	// }
-
 	// OAuth Mobile endpoints (public access)
 	r.POST("/api/auth/google/mobile", auth.GoogleMobileCallback(db, bJwtToken))
-	// r.POST("/api/auth/facebook/mobile", auth.FacebookMobileCallback(db, bJwtToken))
 
 	// User
 	admin.GET("/users", user.GetAllUsers(db))
