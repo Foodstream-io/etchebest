@@ -24,6 +24,7 @@ import {
 } from "@/services/streaming";
 import { useAuth } from "@/lib/useAuth";
 import HomeFooter from "@/components/home/HomeFooter";
+import IngredientPanel from "@/components/recipe/IngredientPanel";
 import { ORANGE_GRADIENT_CSS } from "@/lib/ui/colors";
 
 type PlayerMode = "native" | "hlsjs" | "unsupported";
@@ -512,6 +513,14 @@ export default function WatchRoomPage() {
           </section>
 
           <aside className="min-w-0">
+            {roomId ? (
+              <IngredientPanel
+                roomId={roomId}
+                token={token}
+                editable={false}
+              />
+            ) : null}
+
             <div className="flex h-full max-h-[760px] flex-col overflow-hidden rounded-[28px] border border-black/8 bg-white/72 shadow-[0_16px_40px_rgba(0,0,0,0.05)] backdrop-blur-md dark:border-white/10 dark:bg-[#120b05]/60 dark:shadow-[0_16px_40px_rgba(0,0,0,0.35)]">
               <div className="flex items-center justify-between border-b border-black/8 px-4 py-4 dark:border-white/10">
                 <div className="flex items-center gap-2">

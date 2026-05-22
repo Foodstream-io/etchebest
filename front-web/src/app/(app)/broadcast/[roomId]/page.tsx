@@ -5,6 +5,7 @@ import BroadcastEmptyState from "@/components/broadcast/BroadcastEmptyState";
 import BroadcastRemoteCard from "@/components/broadcast/BroadcastRemoteCard";
 import BroadcastStatusPill from "@/components/broadcast/BroadcastStatusPill";
 import getBroadcastEmptyStateMessage from "@/components/broadcast/getBroadcastEmptyStateMessage";
+import IngredientPanel from "@/components/recipe/IngredientPanel";
 import getBroadcastStatusMeta, {
   type BroadcastState,
 } from "@/components/broadcast/getBroadcastStatusMeta";
@@ -352,6 +353,11 @@ export default function BroadcastRoomPage() {
           </section>
 
           <aside className="grid gap-5">
+            <IngredientPanel
+              roomId={displayRoom ?? ""}
+              token={token}
+              editable={isHost}
+            />
             <div className="rounded-[30px] border border-black/8 bg-white/75 p-4 shadow-[0_16px_50px_rgba(0,0,0,0.06)] backdrop-blur-md dark:border-white/10 dark:bg-[#120b05]/65 dark:shadow-[0_16px_50px_rgba(0,0,0,0.35)]">
               <div className="mb-4 flex items-center justify-between">
                 <div>

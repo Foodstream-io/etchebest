@@ -14,7 +14,9 @@ import {
 } from "lucide-react";
 
 import HomeFooter from "@/components/home/HomeFooter";
+import IngredientPanel from "@/components/recipe/IngredientPanel";
 import { getLiveByRoomId, type LiveDTO } from "@/lib/lives";
+import { useAuth } from "@/lib/useAuth";
 
 type QualityOption = {
   label: string;
@@ -32,6 +34,7 @@ function getPublicMediaUrl(path: string) {
 export default function ReplayDetailPage() {
   const params = useParams<{ id: string }>();
   const replayId = params?.id;
+  const { token } = useAuth();
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const hlsRef = useRef<Hls | null>(null);
@@ -348,6 +351,14 @@ export default function ReplayDetailPage() {
             </div>
 
             <aside className="space-y-3">
+              {replayId ? (
+                <IngredientPanel
+                  roomId={replayId}
+                  token={token}
+                  editable={false}
+                />
+              ) : null}
+
               <div className="rounded-3xl bg-black/[0.03] p-4 dark:bg-white/[0.04]">
                 <div className="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-white">
                   <User className="h-4 w-4 text-orange-500" />
