@@ -11,6 +11,7 @@ import (
 	"github.com/Foodstream-io/etchebest/internal/modules/user"
 	"github.com/Foodstream-io/etchebest/internal/modules/search"
 	"github.com/Foodstream-io/etchebest/internal/modules/activity"
+	"github.com/Foodstream-io/etchebest/internal/modules/recipe"
 	"github.com/Foodstream-io/etchebest/internal/modules/live"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -96,6 +97,12 @@ func Routes(r *gin.Engine, db *gorm.DB, jwtToken string, stunServerURL string, w
 	api.POST("/rooms/:roomId/reserve", room.ReserveRoom(db))
 	api.POST("/rooms/participant", room.AddParticipant(db))
 	api.POST("/rooms/:roomId/disconnect", room.HandleDisconnect(db))
+
+	// Recipe ingredients
+	api.GET("/lives/:roomId/ingredients", recipe.GetIngredients(db))
+	api.POST("/lives/:roomId/ingredients", recipe.CreateNewIngredient(db))
+	api.PATCH("/lives/:roomId/ingredients/:ingredientId", recipe.UpdateExistingIngredient(db))
+	api.DELETE("/lives/:roomId/ingredients/:ingredientId", recipe.DeleteExistingIngredient(db))
 
 	// Chat
 	api.GET("/rooms/:roomId/chat", chat.GetAllChatsByRoom(db))
